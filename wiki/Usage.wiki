@@ -1,0 +1,48 @@
+==Start==
+
+Start server with
+
+ cd oreste
+ ./start-dev.sh
+
+==Demo Moodle==
+
+A module "moodle" is included in the distribution. The following urls can help you to understand what you should do wuth oRestE
+ 
+ http://localhost:8000/moodle/admin/help.txt
+
+ User/password: test/test
+
+ http://localhost:8000/moodle/learninglab/user.xml?username=matteo
+ http://localhost:8000/moodle/learninglab/user.csv?username=matteo
+ http://localhost:8000/moodle/learninglab/user.txt?username=matteo,lengths=30
+
+== Add your new module/sql statements ==
+
+Configure your odbc DSN at Operating System Level (unixODBC for linux)
+
+Add your valid ODBC DSN entries in the file priv/dsnpool.conf
+
+
+Add the file priv/sqlpool/yourproject.conf with the list of your sql statements you want to expose via http
+
+Add a line in priv/dispatcher.conf 
+
+Lunch
+
+    http://localhost:8000/yourproject/admin/help.txt 
+
+you will get the list of valid commands and parameters
+
+You can run them with
+
+    http://localhost:8000/yourproject/yourdsn/yoursqlcommand.typeofoutput?optionalparam1=value1,.. 
+
+typeofoutput can be:
+
+    * xml
+    * csv,
+    * txt: requires a parameter 'lengths' with the list of integers (comma separated) that are the lengths for each field 
+
+
+Http basic Authentication is eabled by default: use test/test 
