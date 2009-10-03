@@ -15,7 +15,7 @@
 
 -include_lib("webmachine/include/webmachine.hrl").
 
--record(state, {dsnpool=[], sqlpool=[]}).
+-record(state, {dsnpool=[], sqlpool=[], requests=0}).
 
 init([Sqlfile]) ->
     {ok, DSNpool, SQLpool} = load_configuration(Sqlfile),
@@ -55,7 +55,8 @@ to_text(ReqData, State) ->
 	    true
     end,
     io:format(Result),
-    {Result, ReqData, State}.
+    NewState = State#state{requests = State#state.requests + 1},
+    {Result, ReqData, NewState}.
 
 %% Private Functions
 
@@ -88,8 +89,9 @@ get_sql_parameters(SQL) ->
 parse_sql_command(undefined, _ReqData) -> 
     {error, "Unknown SQL command"};
 parse_sql_command(SQL, ReqData) ->
-    % Now I retreive all url parameters and try to replace them in 
-    % the SQL  statement
+    % Now I retreive all url parameters and start replacing them in 
+    % the SQL  statement. 
+    % TODO "lengths" is dedicated to txt output and sould be not used here
     RQ =  wrq:req_qs(ReqData),
     Result = lists:foldl(
 	       fun({Key,Val}, Acc) ->
@@ -102,7 +104,7 @@ parse_sql_command(SQL, ReqData) ->
 	       RQ
 	      ),
 
-    % are there any not repacled parameters inside the
+    % are there any remaining parameters inside the
     % sql statement?
 
     case get_sql_parameters(Result) of
@@ -117,6 +119,8 @@ parse_sql_command(SQL, ReqData) ->
 
 parse_command("help", _ReqData, _State) ->
     {ok, help};
+parse_command("status", _ReqData, _State) ->
+    {ok, status};
 parse_command(Command, ReqData, State) when is_list(Command) ->
     CommandKey = list_to_atom(Command),
     parse_sql_command(proplists:get_value(CommandKey, State#state.sqlpool), ReqData).
@@ -207,6 +211,7 @@ exec_sql_command(DSN, SQL, Extension, ReqData) ->
 	    {error, Output}
     end.
 
+
 exec_admin_command(help, State) ->
     DSNout = 
 	lists:foldl(
@@ -225,6 +230,6 @@ exec_admin_command(help, State) ->
 		  Acc ++ "\n\t" ++ atom_to_list(Key) ++ ": " ++ Params end,
 	  "SQL list:", 
 	  State#state.sqlpool),
-
-    {ok, DSNout ++ "\n" ++ SQLout}.
-    
+    {ok, DSNout ++ "\n" ++ SQLout};
+exec_admin_command(status, State) ->  
+    {ok, "Requests: " ++ integer_to_list(State#state.requests)}.
