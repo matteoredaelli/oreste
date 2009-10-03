@@ -1,0 +1,5 @@
+ * get source code from svn trunk/oreste
+ * cd oreste
+ * cd deps/webmachine/deps/mochiweb & make clean & make
+ * cd deps/webmachine/ & make clean & make
+ * make clean & make
