@@ -37,7 +37,7 @@ join_to_fixed(List, Lengths, Char) ->
 %%%   split("How about a nice   hawaiian punch?" " +").
 
 split_inclusive(Str, Regex) ->
-    {match, Matches} = regexp:matches(Str, Regex),
+    {match, Matches} = re:matches(Str, Regex),
     regexp_loop(Str, [], 1, Matches).
 
 
