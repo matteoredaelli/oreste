@@ -79,9 +79,10 @@ get_sql_parameters(SQL) ->
 	nomatch ->
 	    nomatch;
 	{match, List} ->
-	    Result = lists:map(
+	    ResultList = lists:map(
 	      fun(Param) -> lists:nth(2,Param) end,
 	      List),
+	    Result = sets:to_list( sets:from_list(ResultList) ),	
 	    {match, Result}
     end.
 
