@@ -39,11 +39,12 @@
 %%
 %% output of sql_query (at least one record)
 %%
-to_csv({selected, _Fields, Records}) ->
+to_csv({selected, Fields, Records}) ->
+    Header = string:join(Fields, ?CSV_FIELDS_SEPARATOR),
     List = lists:map(
       fun record_to_csv_row/1,
       Records),
-    {ok, string:join(List, "\n")};
+    {ok, Header ++ "\n" ++ string:join(List, "\n")};
 %%
 %% other outputs
 %%
