@@ -54,7 +54,7 @@ to_text(ReqData, State) ->
 	{error, Result} ->
 	    true
     end,
-    io:format("~ts", [Result]),
+    io:format("~ts", [list_to_binary(Result)]),
     NewState = State#state{requests = State#state.requests + 1},
     {Result, ReqData, NewState}.
 
