@@ -56,7 +56,7 @@ to_csv(Other) -> Other.
 
 to_xml({selected, Keys, Records}) ->
     Indexes = lists:seq(1,length(Keys)), 
-    Header = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" ++ "<records>\n",
+    Header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" ++ "<records>\n",
     ListOfRecords = lists:map(
       fun(Rec) ->
 	      Values = list_to_list_of_strings( tuple_to_list(Rec) ),
@@ -122,6 +122,8 @@ list_to_list_of_strings(List) ->
 		      float_to_list(V);
 		 null == V ->
 		      "";
+		 is_list(V) ->
+		      list_to_binary(V);
 		 true -> V
 	      end
       end, List).
