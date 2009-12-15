@@ -122,8 +122,6 @@ list_to_list_of_strings(List) ->
 		      float_to_list(V);
 		 null == V ->
 		      "";
-		 is_list(V) ->
-		      list_to_binary(V);
 		 true -> V
 	      end
       end, List).
