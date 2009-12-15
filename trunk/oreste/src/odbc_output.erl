@@ -44,7 +44,9 @@ to_csv({selected, Fields, Records}) ->
     List = lists:map(
       fun record_to_csv_row/1,
       Records),
-    {ok, Header ++ "\n" ++ string:join(List, "\n")};
+    Body = string:join(List, "\n"),
+    Result = io_lib:format("~s~n~s", [Header, Body]),
+    {ok, Result};
 %%
 %% other outputs
 %%
@@ -57,6 +59,7 @@ to_csv(Other) -> Other.
 to_xml({selected, Keys, Records}) ->
     Indexes = lists:seq(1,length(Keys)), 
     Header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" ++ "<records>\n",
+    Footer = "</records>\n",
     ListOfRecords = lists:map(
       fun(Rec) ->
 	      Values = list_to_list_of_strings( tuple_to_list(Rec) ),
@@ -70,7 +73,7 @@ to_xml({selected, Keys, Records}) ->
 	      "  <record>\n" ++ string:join(List,"") ++ "  </record>\n"
       end,
       Records),
-    {ok, Header ++ string:join(ListOfRecords, "") ++ "</records>\n"};
+    {ok, Header ++ string:join(ListOfRecords, "") ++ Footer};
 
 to_xml(Other) -> Other.
 
@@ -91,7 +94,8 @@ to_fixed({selected, Fields, Records}, Lengths, Char) ->
 	    List = lists:map(
 		     fun(R) -> record_to_fixed_row(R,Lengths, Char) end,
 		     Records),
-	    {ok, string:join(List, "\n")};
+	    Body = string:join(List, "\n"),
+	    {ok, Body};
 	false ->
 	    {error, "Different number of columns"}
     end;
