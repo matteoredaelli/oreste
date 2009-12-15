@@ -54,7 +54,7 @@ to_text(ReqData, State) ->
 	{error, Result} ->
 	    true
     end,
-    io:format(Result),
+    io:format("~ts", [Result]),
     NewState = State#state{requests = State#state.requests + 1},
     {Result, ReqData, NewState}.
 
