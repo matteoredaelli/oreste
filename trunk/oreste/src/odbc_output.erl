@@ -67,7 +67,7 @@ to_xml({selected, Keys, Records}) ->
 		fun(I) ->
 			Key = lists:nth(I, Keys),
 			Value = lists:nth(I, Values),
-			io_lib:format("    <~s>~s</~s>~n", [Key,Value,Key])
+			io_lib:format("    <~s><![CDATA[~s]]></~s>~n", [Key,Value,Key])
 		end,
 		Indexes),
 	      "  <record>\n" ++ string:join(List,"") ++ "  </record>\n"
