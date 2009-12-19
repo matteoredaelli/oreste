@@ -22,19 +22,39 @@ A module "moodle" is included in the distribution. The following urls can help y
 Configure your odbc DSN at Operating System Level (unixODBC for linux)
 
 Add your valid ODBC DSN entries in the file priv/dsnpool.conf
+For instance
+
+{{{
+   {learninglab, "DSN=LEARNINGLAB"}.
+}}}
 
 
-Add the file priv/sqlpool/yourproject.conf with the list of your sql statements you want to expose via http
+Add the file priv/sqlpool/yourproject.conf with the list of your sql statements you want to expose via http. For instance
 
-Add a line in priv/dispatcher.conf 
+{{{
+  {user, 
+	"select *
+	from
+		mdl_user 
+	where
+		username='{username}'"
+  }.
+}}}
 
-Lunch
+
+Add a line in priv/dispatcher.conf. For instance
+
+{{{
+  {["moodle", dsn, command, '*'], oreste_resource, ["moodle"]}.
+}}}
+
+Open in your preferred web browser (firefox)
 
     http://localhost:8000/yourproject/admin/help.txt 
 
-you will get the list of valid commands and parameters
+and you will get the list of valid commands and parameters
 
-You can run them with
+You can call them with
 
     http://localhost:8000/yourproject/yourdsn/yoursqlcommand.typeofoutput?optionalparam1=value1,.. 
 
