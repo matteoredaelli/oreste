@@ -15,11 +15,11 @@
 
 -include_lib("webmachine/include/webmachine.hrl").
 
--record(state, {dsnpool=[], sqlpool=[], requests=0}).
+-record(state, {auth=[], dsnpool=[], sqlpool=[], requests=0}).
 
-init([Sqlfile]) ->
+init([Sqlfile, Auth]) ->
     {ok, DSNpool, SQLpool} = load_configuration(Sqlfile),
-    {ok, #state{dsnpool=DSNpool, sqlpool=SQLpool}}.
+    {ok, #state{auth=Auth, dsnpool=DSNpool, sqlpool=SQLpool}}.
 
 content_types_provided(ReqData, State) ->
    {[{"text/plain",to_text}], ReqData, State}.
@@ -35,8 +35,8 @@ is_authorized(ReqData, State) ->
             case wrq:get_req_header("authorization", ReqData) of
                 "Basic "++Base64 ->
                     Str = base64:mime_decode_to_string(Base64),
-                    case string:tokens(Str, ":") of
-                        ["test", "test"] ->
+                    case State#state.auth of
+                        Str ->
                             {true, ReqData, State};
                         _ ->
                             {"Basic realm=webmachine", ReqData, State}
@@ -54,7 +54,7 @@ to_text(ReqData, State) ->
 	{error, Result} ->
 	    true
     end,
-    io:format("~ts", [Result]),
+%    io:format("~ts", [Result]),
     NewState = State#state{requests = State#state.requests + 1},
     {Result, ReqData, NewState}.
 
