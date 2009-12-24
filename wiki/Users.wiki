@@ -1,0 +1,6 @@
+==Pirelli==
+
+"I use oRestE in Pirelli to expose Moodle data to SAP and other HR systems" 
+
+Matteo
+http://www.redaelli.org/matteo/
