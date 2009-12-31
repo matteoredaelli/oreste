@@ -92,7 +92,7 @@ parse_sql_command(undefined, _ReqData) ->
 parse_sql_command(SQL, ReqData) ->
     % Now I retreive all url parameters and start replacing them in 
     % the SQL  statement. 
-    % TODO "lengths" is dedicated to txt output and sould be not used here
+    % TODO "lengths" is dedicated to txt output and should be not used here
     RQ =  wrq:req_qs(ReqData),
     Result = lists:foldl(
 	       fun({Key,Val}, Acc) ->
