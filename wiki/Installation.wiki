@@ -1,3 +1,10 @@
+Requirements
+
+ * erlang: http://ftp.sunet.se/pub/lang/erlang/index.html
+ * make
+
+Installation
+
  * get source code from svn trunk/oreste
  * cd oreste
  * cd deps/webmachine/deps/mochiweb & make clean & make
