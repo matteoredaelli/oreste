@@ -7,11 +7,11 @@ Start server with
 
 ==Demo Moodle==
 
-A module "moodle" is included in the distribution. The following urls can help you to understand what you should do wuth oRestE
+A module "moodle" is included in the distribution. The following urls can help you to understand better what you can do with oRestE
  
  http://localhost:8000/moodle/admin/help.txt
 
- User/password: user/pass
+ User/password: user/pass (see file priv/dispatcher.conf)
 
  http://localhost:8000/moodle/learninglab/user.xml?username=matteo
  http://localhost:8000/moodle/learninglab/user.csv?username=matteo
@@ -62,7 +62,7 @@ For instance
 }}}
 
 
-Add the file priv/sqlpool/yourproject.conf with the list of your sql statements you want to expose via http. For instance
+Add the file priv/sqlpool/yourproject.conf with the list of your sql statements you want to expose via http. For instance moodle.conf
 
 {{{
   {user, 
