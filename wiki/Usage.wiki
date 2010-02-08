@@ -11,7 +11,7 @@ A module "moodle" is included in the distribution. The following urls can help y
  
  http://localhost:8000/moodle/admin/help.txt
 
- User/password: test/test
+ User/password: user/pass
 
  http://localhost:8000/moodle/learninglab/user.xml?username=matteo
  http://localhost:8000/moodle/learninglab/user.csv?username=matteo
@@ -45,8 +45,10 @@ Add the file priv/sqlpool/yourproject.conf with the list of your sql statements 
 Add a line in priv/dispatcher.conf. For instance
 
 {{{
-  {["moodle", dsn, command, '*'], oreste_resource, ["moodle"]}.
+  {["moodle", dsn, command, '*'], oreste_resource, ["moodle", "user:pass"]}.
 }}}
+
+Http basic Authentication is enabled by default: user:pass are the user/password you need to get the urls
 
 Open in your preferred web browser (firefox)
 
@@ -63,6 +65,3 @@ typeofoutput can be:
     * xml
     * csv,
     * txt: requires a parameter 'lengths' with the list of integers (comma separated) that are the lengths for each field 
-
-
-Http basic Authentication is eabled by default: use test/test 
