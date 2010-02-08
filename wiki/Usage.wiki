@@ -21,6 +21,39 @@ A module "moodle" is included in the distribution. The following urls can help y
 
 Configure your odbc DSN at Operating System Level (unixODBC for linux)
 
+File odbcinst.ini
+
+{{{
+[FreeTDS]
+Description	= TDS driver (Sybase/MS SQL)
+Driver		= /usr/lib/odbc/libtdsodbc.so
+Setup		= /usr/lib/odbc/libtdsS.so
+CPTimeout	= 
+CPReuse		= 
+
+[MySQL]
+Description     = Mysql driver
+Driver          = /usr/lib/odbc/libmyodbc.so
+;Setup           =
+CPTimeout       =
+CPReuse         =
+}}}
+ 
+File odbc.ini
+
+{{{
+[LEARNINGLAB]
+Driver       = MySQL
+Description  = LEARNINGLAB
+Server       = localhost
+Port         =
+User         = moodle
+Password     = modole
+Database     = moodle
+Option       = 3
+Socket       =
+}}}
+
 Add your valid ODBC DSN entries in the file priv/dsnpool.conf
 For instance
 
