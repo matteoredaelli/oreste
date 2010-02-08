@@ -2,6 +2,8 @@ Requirements
 
  * erlang: http://ftp.sunet.se/pub/lang/erlang/index.html
  * make
+ * unixodbc: for unix systems
+ * odbc drivers for the database types you use (mysql, oracle, freetds)
 
 Installation
 
