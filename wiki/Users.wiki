@@ -1,3 +1,3 @@
 ==Pirelli==
 
-"I use oRestE in my company to expose Moodle data to SAP and other HR systems" - [http://www.redaelli.org/matteo/ Matteo Redaelli]
+"I use oRestE in Pirelli to expose Moodle data to SAP HR and other external systems" - [http://www.redaelli.org/matteo/ Matteo Redaelli]
