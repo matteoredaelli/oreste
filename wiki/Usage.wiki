@@ -96,5 +96,6 @@ You can call them with
 typeofoutput can be:
 
     * xml
-    * csv,
+    * csv 
+    * xls  (semi column separated file)
     * txt: requires a parameter 'lengths' with the list of integers (comma separated) that are the lengths for each field 
