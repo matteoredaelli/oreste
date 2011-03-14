@@ -7,11 +7,9 @@
 %%%-------------------------------------------------------------------
 -module(odbc_output).
 
--define(CSV_FIELDS_SEPARATOR, ",").
-
 %% API
 -export([
-	 to_csv/1,
+	 to_csv/2,
 	 to_fixed/3,
 	 to_xml/1
 	]).
@@ -39,18 +37,20 @@
 %%
 %% output of sql_query (at least one record)
 %%
-to_csv({selected, Fields, Records}) ->
-    Header = string:join(Fields, ?CSV_FIELDS_SEPARATOR),
+to_csv({selected, Fields, Records}, FieldSeparator) ->
+    Header = string:join(Fields, FieldSeparator),
     List = lists:map(
-      fun record_to_csv_row/1,
-      Records),
+	     fun(Record) ->
+		     record_to_csv_row(Record, FieldSeparator)
+	     end,
+	     Records),
     Body = string:join(List, "\n"),
     Result = io_lib:format("~s~n~s", [Header, Body]),
     {ok, Result};
 %%
 %% other outputs
 %%
-to_csv(Other) -> Other.
+to_csv(Other, _) -> Other.
 			   
 %%--------------------------------------------------------------------
 %% Function: to_xml
@@ -109,9 +109,9 @@ to_fixed(Other, _Lengths, _Char) -> Other.
 %% Internal functions
 %%====================================================================
 
-record_to_csv_row(R) ->
+record_to_csv_row(R, FieldSeparator) ->
     List = tuple_to_list(R),
-    string:join(list_to_list_of_strings(List), ?CSV_FIELDS_SEPARATOR).
+    string:join(list_to_list_of_strings(List), FieldSeparator).
 
 record_to_fixed_row(R, Lengths, Char) ->
     List = tuple_to_list(R),
