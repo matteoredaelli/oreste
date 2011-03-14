@@ -153,7 +153,7 @@ parse_dsn(DSNkey, State) ->
     end.
 
 parse_extension(Ext)->
-    case lists:member(Ext,["csv","txt","xml"]) of
+    case lists:member(Ext,["csv","csv2","txt","xml"]) of
 	true ->
 	    {ok, list_to_atom(Ext)};
         false ->
