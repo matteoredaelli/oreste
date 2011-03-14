@@ -91,9 +91,9 @@ and you will get the list of valid commands and parameters
 
 You can call them with
 
-    http://localhost:8000/yourproject/yourdsn/yoursqlcommand.typeofoutput?optionalparam1=value1,.. 
+  http://localhost:8000/yourproject/yourdsn/yoursqlcommand.typeofoutput?optionalparam1=value1,.. 
 
-typeofoutput can be:
+*type of output* can be:
 
     * xml
     * csv 
