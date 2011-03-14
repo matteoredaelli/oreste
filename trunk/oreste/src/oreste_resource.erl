@@ -153,7 +153,7 @@ parse_dsn(DSNkey, State) ->
     end.
 
 parse_extension(Ext)->
-    case lists:member(Ext,["csv","csv2","txt","xml"]) of
+    case lists:member(Ext,["csv","xls","txt","xml"]) of
 	true ->
 	    {ok, list_to_atom(Ext)};
         false ->
@@ -190,7 +190,7 @@ exec_sql_command(DSN, SQL, Extension, ReqData) ->
 		    odbc_output:to_xml(Output);
 		csv ->
 		    odbc_output:to_csv(Output, ",");
-		csv2 ->
+		xls ->
 		    odbc_output:to_csv(Output, ";");
 		txt ->
 		    case wrq:get_qs_value("lengths",ReqData) of
