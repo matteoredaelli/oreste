@@ -181,7 +181,7 @@ parse_reqdata(ReqData, State) ->
 
 exec_sql_command(DSN, SQL, Extension, ReqData) ->
     io:format("Executing in DB ~s the SQL ~s~n", [DSN, SQL]),
-    case catch odbc:connect(DSN, [{timeout, 5000}]) of
+    case catch odbc:connect(DSN, [{timeout, 5000}, {scrollable_cursors, off}]) of
 	{ok, Ref} ->
 	    Output = odbc:sql_query(Ref, SQL),
 	    odbc:disconnect(Ref),
