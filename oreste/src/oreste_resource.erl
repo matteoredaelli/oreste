@@ -189,7 +189,9 @@ exec_sql_command(DSN, SQL, Extension, ReqData) ->
 		xml ->
 		    odbc_output:to_xml(Output);
 		csv ->
-		    odbc_output:to_csv(Output);
+		    odbc_output:to_csv(Output, ",");
+		csv2 ->
+		    odbc_output:to_csv(Output, ";");
 		txt ->
 		    case wrq:get_qs_value("lengths",ReqData) of
 			undefined ->
