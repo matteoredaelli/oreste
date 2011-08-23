@@ -1,25 +1,39 @@
-%% @author author <matteo.redaelli@libero.it>
-%% @Copyright (c) 2009,2010,2011 Matteo Redaelli.
+%% @author author <author@example.com>
+%% @copyright YYYY author.
 
-%% @doc TEMPLATE.
+%% @doc oreste startup code
 
 -module(oreste).
--author('author <matteo.redaelli@libero.it>').
--export([start/0, stop/0]).
+-author('author <author@example.com>').
+-export([start/0, start_link/0, stop/0]).
 
 ensure_started(App) ->
     case application:start(App) of
-	ok ->
-	    ok;
-	{error, {already_started, App}} ->
-	    ok
+        ok ->
+            ok;
+        {error, {already_started, App}} ->
+            ok
     end.
-	
+
+%% @spec start_link() -> {ok,Pid::pid()}
+%% @doc Starts the app for inclusion in a supervisor tree
+start_link() ->
+    ensure_started(inets),
+    ensure_started(crypto),
+    ensure_started(mochiweb),
+    application:set_env(webmachine, webmachine_logger_module, 
+                        webmachine_logger),
+    ensure_started(webmachine),
+    oreste_sup:start_link().
+
 %% @spec start() -> ok
 %% @doc Start the oreste server.
 start() ->
-    oreste_deps:ensure(),
+    ensure_started(inets),
     ensure_started(crypto),
+    ensure_started(mochiweb),
+    application:set_env(webmachine, webmachine_logger_module, 
+                        webmachine_logger),
     ensure_started(webmachine),
     application:start(oreste).
 
@@ -28,5 +42,7 @@ start() ->
 stop() ->
     Res = application:stop(oreste),
     application:stop(webmachine),
+    application:stop(mochiweb),
     application:stop(crypto),
+    application:stop(inets),
     Res.
