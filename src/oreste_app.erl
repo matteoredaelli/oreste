@@ -1,5 +1,5 @@
 %% @author author <matteo.redaelli@libero.it>
-%% @copyright 2009 author.
+%% @Copyright (c) 2009,2010,2011 Matteo Redaelli.
 
 %% @doc Callbacks for the oreste application.
 
