@@ -53,5 +53,13 @@ init([]) ->
     Web = {webmachine_mochiweb,
            {webmachine_mochiweb, start, [WebConfig]},
            permanent, 5000, worker, dynamic},
-    Processes = [Web],
+    %% matteo changes
+    DsnFile = filename:join(
+		[filename:dirname(code:which(?MODULE)),
+		 "..", "priv", "dsnpool.conf"]),
+    DsnSup = {oreste_dsn_sup,
+	      {oreste_dsn_sup, start_link, [DsnFile]},
+	      permanent, 5000, worker, dynamic},
+    Processes = [Web, DsnSup],
+
     {ok, { {one_for_one, 10, 10}, Processes} }.
