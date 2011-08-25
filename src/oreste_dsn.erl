@@ -66,9 +66,15 @@ handle_call({sql_query, SQL}, _From, State) ->
     DSN = State#state.dsn,
     case State#state.dbConn of
 	{ok, Ref} ->
-	    NewState = State,
-	    %% TODO: CHECK RESULT {error, Reason} and maybe try to reconnect to DB
-	    Reply = odbc:sql_query(Ref, SQL);
+	    case Reply = odbc:sql_query(Ref, SQL) of
+		{error, Reason} ->
+		    error_logger:error_msg("Cannot run SQL to DB ~p, reason: ~p ~n", [DSN, Reason]),
+		    error_logger:error_msg("Trying to reconnect to DB ~p ~n", [DSN]),
+		    TmpState = db_disconnect(State),
+		    NewState = db_connect(TmpState);
+		Reply ->
+		    NewState = State
+	    end;
 	{error, Reason} ->
 	    error_logger:error_msg("Cannot run SQL: not connected to DB ~p, reason: ~p ~n", [DSN, Reason]),
 	    NewState = db_connect(State),
