@@ -15,11 +15,11 @@
 
 -include_lib("webmachine/include/webmachine.hrl").
 
--record(state, {auth=[], dsnpool=[], sqlpool=[], requests=0}).
+-record(state, {auth=[], sqlpool=[], requests=0}).
 
 init([Sqlfile, Auth]) ->
-    {ok, DSNpool, SQLpool} = load_configuration(Sqlfile),
-    {ok, #state{auth=Auth, dsnpool=DSNpool, sqlpool=SQLpool}}.
+    {ok, SQLpool} = load_configuration(Sqlfile),
+    {ok, #state{auth=Auth, sqlpool=SQLpool}}.
 
 content_types_provided(ReqData, State) ->
    {[{"text/plain",to_text}], ReqData, State}.
@@ -65,9 +65,8 @@ load_configuration(Sqlfile) ->
 	     [filename:dirname(code:which(?MODULE)),
 	      "..", "priv"]),
     % TODO: check if files exist
-    {ok, DSNpool} = file:consult(filename:join([Path, "dsnpool.conf"])),
     {ok, SQLpool} = file:consult(filename:join([Path, "sqlpool", Sqlfile ++ ".conf"])),
-    {ok, DSNpool, SQLpool}.
+    {ok, SQLpool}.
 
 %% retreive all pamameters like {param1} inside a string
 %% output: a list like ["param1", "param2, ...]
@@ -143,14 +142,16 @@ parse_command_extension(_Else, _ReqData, _State ) ->
 
 parse_dsn(admin, _State)->
     {ok, admin};
-parse_dsn(DSNkey, State) ->
-    case proplists:get_value(DSNkey, State#state.dsnpool) of
-	undefined ->
-	    Output = io_lib:format("No valid DSN ~s.", [atom_to_list(DSNkey)]),
-	    {error, Output};
-	DSN ->
-	    {ok, DSN}
-    end.
+parse_dsn(DSNkey, _State) ->
+%% TODO: check id DSN is valid (using which children of oreste_dsn_sup ...
+
+%%    case proplists:get_value(DSNkey, State#state.dsnpool) of
+%%	undefined ->
+%%	    Output = io_lib:format("No valid DSN ~s.", [atom_to_list(DSNkey)]),
+%%	    {error, Output};
+%%	DSN ->
+	    {ok, DSNkey}.
+%%    end.
 
 parse_extension(Ext)->
     case lists:member(Ext,["csv","xls","txt","xml"]) of
@@ -176,15 +177,14 @@ parse_reqdata(ReqData, State) ->
 		{ok, DSN} ->
 		    {ok, DSN, Command, Extension}
 	    end
-
     end.
 
 exec_sql_command(DSN, SQL, Extension, ReqData) ->
     io:format("Executing in DB ~s the SQL ~s~n", [DSN, SQL]),
-    case catch odbc:connect(DSN, [{timeout, 5000}, {scrollable_cursors, off}]) of
-	{ok, Ref} ->
-	    Output = odbc:sql_query(Ref, SQL),
-	    odbc:disconnect(Ref),
+    case Output = oreste_dsn:sql_query(DSN, SQL) of
+	{error, Reason} ->
+	    Output = io_lib:format("Cannot run query to DB ~p. Reason:~p.", [DSN, Reason]);
+	Output ->
 	    case Extension of
 		xml ->
 		    odbc_output:to_xml(Output);
@@ -208,19 +208,11 @@ exec_sql_command(DSN, SQL, Extension, ReqData) ->
 		    end;
 		_Else ->
 		    {error, "BUG: Unexpected extension"}
-	    end;
-	_Else ->
-	    Output = io_lib:format("Connection timeout to database ~s.", [DSN]),
-	    {error, Output}
+	    end
     end.
 
-
 exec_admin_command(help, State) ->
-    DSNout = 
-	lists:foldl(
-	  fun({Key,_}, Acc) -> Acc ++ "\n\t" ++ atom_to_list(Key) end,
-	  "DSN list: ", 
-	  State#state.dsnpool),
+    DSNout = "TODO",
     SQLout = 
 	lists:foldl(
 	  fun({Key,Value}, Acc) ->
