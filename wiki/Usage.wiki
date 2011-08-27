@@ -5,12 +5,17 @@ Start server with
  cd oreste
  ./start-dev.sh
 
+==Admin commands==
+ 
+ http://localhost:8000/moodle/admin/help.txt  (TODO)
+ http://localhost:8000/moodle/admin/status.txt  (reload sql statement from file)
+ http://localhost:8000/moodle/admin/status.txt
+
+ User/password: user/pass (see file priv/dispatcher.conf)
+
 ==Demo Moodle==
 
 A module "moodle" is included in the distribution. The following urls can help you to understand better what you can do with oRestE
- 
- http://localhost:8000/moodle/admin/help.txt  (TODO)
- http://localhost:8000/moodle/admin/status.txt
 
  User/password: user/pass (see file priv/dispatcher.conf)
 
