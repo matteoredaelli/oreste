@@ -41,10 +41,10 @@ start_link(DsnFile) ->
 %%--------------------------------------------------------------------
 init([DsnFile]) ->
     {ok, Dsn_list} = file:consult(DsnFile),
+    %%DsnNames = lists:map(fun(x) -> atom_to_list/1, proplists:get_keys(Dsn_list)),
+    error_logger:info_msg("~p: starting ~p DSN children~n", [?MODULE, length(Dsn_list)]),
     ChildrenSpecs = lists:map(
 		      fun({Name,DSN}) ->
-			      NameStr = atom_to_list(Name),
-			      error_logger:info_msg("DSN: ~p~n", [NameStr]),
 			      AChild = {Name,{oreste_dsn,start_link,[{Name,DSN}]},
 					permanent,2000,worker,[oreste_dsn]},
 			      AChild
