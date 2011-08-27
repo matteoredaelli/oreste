@@ -73,9 +73,14 @@ exec_admin_command(help, _State) ->
 	%%   "SQL list:", 
 	%%   State#state.sqlpool),
     {ok, DSNout ++ "\n" ++ SQLout};
-exec_admin_command(status, State) ->  
-    SqlStatus  = oreste_sql:status(State#state.sqlName),
-    Reply = "Resource Requests=" ++ integer_to_list(State#state.requests) ++ "\n" ++ SqlStatus,
+exec_admin_command(status, State) ->
+    Children = lists:append(supervisor:which_children(oreste_dsn_sup),
+			    supervisor:which_children(oreste_sql_sup)
+			   ),
+    StatusList = lists:map( fun({Name,_,_,[Module]}) -> Module:status(Name) end, Children),
+    Reply = "Resource Requests=" ++ integer_to_list(State#state.requests) ++ 
+	"\n\n" ++
+	string:join(StatusList, "\n"),
     {ok, Reply}.
 
 exec_sql_command(DSN, SQL, Extension, ReqData) ->
