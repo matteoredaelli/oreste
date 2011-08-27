@@ -60,6 +60,14 @@ init([]) ->
     DsnSup = {oreste_dsn_sup,
 	      {oreste_dsn_sup, start_link, [DsnFile]},
 	      permanent, 5000, worker, dynamic},
-    Processes = [Web, DsnSup],
+
+    SqlFolder = filename:join(
+		[filename:dirname(code:which(?MODULE)),
+		 "..", "priv", "sqlpool"]),
+    SqlSup = {oreste_sql_sup,
+	      {oreste_sql_sup, start_link, [SqlFolder]},
+	      permanent, 5000, worker, dynamic},
+
+    Processes = [Web, DsnSup, SqlSup],
 
     {ok, { {one_for_one, 10, 10}, Processes} }.
