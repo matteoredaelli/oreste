@@ -78,8 +78,8 @@ handle_call({get_sql_statement, Command}, _From, State) ->
     end,
     NewState = State#state{requests = State#state.requests + 1},
     {reply, Reply, NewState};
-handle_call(status, _From, State) ->
-    Reply = "Requests: " ++ integer_to_list(State#state.requests),
+handle_call({status}, _From, State) ->
+    Reply = "SQL name=" ++ atom_to_list(State#state.name) ++ ", requests=" ++ integer_to_list(State#state.requests),
     {reply, Reply, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,
