@@ -85,8 +85,8 @@ handle_call({sql_query, SQL}, _From, State) ->
     end,
     NewState = TmpState#state{requests = TmpState#state.requests + 1},
     {reply, Reply, NewState};
-handle_call(status, _From, State) ->
-    Reply = "Requests: " ++ integer_to_list(State#state.requests),
+handle_call({status}, _From, State) ->
+    Reply = "DSN name=" ++ atom_to_list(State#state.name) ++ ", requests=" ++ integer_to_list(State#state.requests),
     {reply, Reply, State};
 handle_call(stop, _From, State) ->
     NewState = db_disconnect(State),
