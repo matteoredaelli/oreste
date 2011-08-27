@@ -74,7 +74,9 @@ exec_admin_command(help, _State) ->
 	%%   State#state.sqlpool),
     {ok, DSNout ++ "\n" ++ SQLout};
 exec_admin_command(status, State) ->  
-    {ok, "Requests: " ++ integer_to_list(State#state.requests)}.
+    SqlStatus  = oreste_sql:status(State#state.sqlName),
+    Reply = "Resource Requests: " ++ integer_to_list(State#state.requests) ++ "\n" ++ SqlStatus,
+    {ok, Reply}.
 
 exec_sql_command(DSN, SQL, Extension, ReqData) ->
     io:format("Executing in DB ~s the SQL ~s~n", [DSN, SQL]),

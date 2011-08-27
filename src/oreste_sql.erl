@@ -11,7 +11,10 @@
 
 %% API
 -export([start_link/2, 
-	 get_sql_statement/2]).
+	 get_sql_statement/2,
+	 reload_configuration/1,
+	 status/1
+	]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -31,9 +34,14 @@
 get_sql_statement(Name, Command) ->
     gen_server:call(Name, {get_sql_statement, Command}).
 
+reload_configuration(Name) ->
+    gen_server:cast(Name, {reload_configuration}).
+
 start_link(Name,Folder) ->
     gen_server:start_link({local, Name}, ?MODULE, [Name,Folder], []).
 
+status(Name) ->
+    gen_server:call(Name, {status}).
 %%====================================================================
 %% gen_server callbacks
 %%====================================================================
@@ -68,6 +76,10 @@ handle_call({get_sql_statement, Command}, _From, State) ->
 	    error_logger:info_msg("Command ~p found in SQL file ~p~n", 
 				  [Command, State#state.name])
     end,
+    NewState = State#state{requests = State#state.requests + 1},
+    {reply, Reply, NewState};
+handle_call(status, _From, State) ->
+    Reply = "Requests: " ++ integer_to_list(State#state.requests),
     {reply, Reply, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -79,6 +91,9 @@ handle_call(_Request, _From, State) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
+handle_cast({reload_configuration}, State) ->
+    NewState = load_sql_file(State),	    
+    {noreply, NewState};
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
