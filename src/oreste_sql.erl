@@ -79,7 +79,10 @@ handle_call({get_sql_statement, Command}, _From, State) ->
     NewState = State#state{requests = State#state.requests + 1},
     {reply, Reply, NewState};
 handle_call({status}, _From, State) ->
-    Reply = "SQL name=" ++ atom_to_list(State#state.name) ++ ", requests=" ++ integer_to_list(State#state.requests),
+    Reply = 
+	"SQL name=" ++ atom_to_list(State#state.name) ++ 
+	", statements=" ++  integer_to_list(length(State#state.statements)) ++
+	", requests=" ++ integer_to_list(State#state.requests),
     {reply, Reply, State};
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -135,7 +138,7 @@ load_sql_file(State) ->
     error_logger:info_msg("Loading file ~p~n", [File]),
     case file:consult(File) of
 	{ok, Statements} ->
-	    error_logger:info_msg("Loaded file ~p~n", [File]);
+	    error_logger:info_msg("Loaded file ~p: found ~p statements~n", [File, integer_to_list(length(Statements))]);
 	{error, Reason} ->
 	    error_logger:error_msg("Error loading file ~p, reason: ~p ~n", 
 				   [File, Reason]),

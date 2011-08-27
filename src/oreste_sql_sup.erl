@@ -44,15 +44,14 @@ init([Folder]) ->
     %% removing all not .conf files
     SqlFiles = lists:filter(fun(E) -> re:run(E, "\.conf\$") =/= nomatch end, 
 			    AllFiles),
+
     %% removing string .conf$ 
     %% TODO: Files must start with lowercase: please check
     Names = lists:map(fun(F) -> [Name|_] = string:tokens(F, "."), list_to_atom(Name) end,
 		     SqlFiles),
-
+    error_logger:info_msg("~p: starting the SQL children: ~p ~n", [?MODULE, string:join(SqlFiles, ", ")]),
     ChildrenSpecs = lists:map(
 		      fun(Name) ->
-			      NameStr = atom_to_list(Name),
-			      error_logger:info_msg("name: ~p~n", [NameStr]),
 			      AChild = {Name,{oreste_sql,start_link,[Name,Folder]},
 					permanent,2000,worker,[oreste_sql]},
 			      AChild
