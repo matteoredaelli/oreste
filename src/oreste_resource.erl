@@ -15,11 +15,10 @@
 
 -include_lib("webmachine/include/webmachine.hrl").
 
--record(state, {auth=[], sqlpool=[], requests=0}).
+-record(state, {auth=[], sqlName, requests=0}).
 
-init([Sqlfile, Auth]) ->
-    {ok, SQLpool} = load_configuration(Sqlfile),
-    {ok, #state{auth=Auth, sqlpool=SQLpool}}.
+init([SqlName, Auth]) ->
+    {ok, #state{auth=Auth, sqlName=list_to_atom(SqlName)}}.
 
 content_types_provided(ReqData, State) ->
    {[{"text/plain",to_text}], ReqData, State}.
@@ -59,14 +58,56 @@ to_text(ReqData, State) ->
     {Result, ReqData, NewState}.
 
 %% Private Functions
+exec_admin_command(help, _State) ->
+    DSNout = "TODO",
+    SQLout = "TODO",
+	%% lists:foldl(
+	%%   fun({Key,Value}, Acc) ->
+	%% 	  case get_sql_parameters(Value) of
+	%% 	      nomatch -> 
+	%% 		  Params = "";
+	%% 	      {match, ListParams} ->
+	%% 		  Params = string:join(ListParams, ", ")
+	%% 	  end,
+	%% 	  Acc ++ "\n\t" ++ atom_to_list(Key) ++ ": " ++ Params end,
+	%%   "SQL list:", 
+	%%   State#state.sqlpool),
+    {ok, DSNout ++ "\n" ++ SQLout};
+exec_admin_command(status, State) ->  
+    {ok, "Requests: " ++ integer_to_list(State#state.requests)}.
 
-load_configuration(Sqlfile) ->
-    Path = filename:join(
-	     [filename:dirname(code:which(?MODULE)),
-	      "..", "priv"]),
-    % TODO: check if files exist
-    {ok, SQLpool} = file:consult(filename:join([Path, "sqlpool", Sqlfile ++ ".conf"])),
-    {ok, SQLpool}.
+exec_sql_command(DSN, SQL, Extension, ReqData) ->
+    io:format("Executing in DB ~s the SQL ~s~n", [DSN, SQL]),
+    case Output = oreste_dsn:sql_query(DSN, SQL) of
+	{error, Reason} ->
+	    Output = io_lib:format("Cannot run query to DB ~p. Reason:~p.", [DSN, Reason]);
+	Output ->
+	    case Extension of
+		xml ->
+		    odbc_output:to_xml(Output);
+		csv ->
+		    odbc_output:to_csv(Output, ",");
+		xls ->
+		    odbc_output:to_csv(Output, ";");
+		txt ->
+		    case wrq:get_qs_value("lengths",ReqData) of
+			undefined ->
+			    {error, "Missing lengths=N,M,.. parameter"};
+			LengthsString ->
+			    OptListOfStrings = string:tokens(LengthsString, ","),
+			    Lengths = lists:map(
+					fun(E) ->  list_to_integer(E) end,
+					OptListOfStrings),
+			    odbc_output:to_fixed(
+			      Output, 
+			      Lengths, 
+			      $\  ) 
+		    end;
+		_Else ->
+		    {error, "BUG: Unexpected extension"}
+	    end
+    end.
+
 
 %% retreive all pamameters like {param1} inside a string
 %% output: a list like ["param1", "param2, ...]
@@ -86,44 +127,15 @@ get_sql_parameters(SQL) ->
     end.
 
 
-parse_sql_command(undefined, _ReqData) -> 
-    {error, "Unknown SQL command"};
-parse_sql_command(SQL, ReqData) ->
-    % Now I retreive all url parameters and start replacing them in 
-    % the SQL  statement. 
-    % TODO "lengths" is dedicated to txt output and should be not used here
-    RQ =  wrq:req_qs(ReqData),
-    Result = lists:foldl(
-	       fun({Key,Val}, Acc) ->
-		       re:replace(
-			 Acc, "{" ++ Key ++ "}",
-			 Val,
-			 [global,{return, list}]
-			) end,
-	       SQL, 
-	       RQ
-	      ),
-
-    % are there any remaining parameters inside the
-    % sql statement?
-
-    case get_sql_parameters(Result) of
-	nomatch ->
-	    % all parameters {param} inside the sql statement were 
-	    % correctly replaced!
-	    {ok, Result};
-	{match, ListParams} ->
-	    Message = "Missing parameters:" ++ string:join(ListParams,","),
-	    {error, Message}
-    end.
-
 parse_command("help", _ReqData, _State) ->
     {ok, help};
 parse_command("status", _ReqData, _State) ->
     {ok, status};
 parse_command(Command, ReqData, State) when is_list(Command) ->
     CommandKey = list_to_atom(Command),
-    parse_sql_command(proplists:get_value(CommandKey, State#state.sqlpool), ReqData).
+    SqlStatement = oreste_sql:get_sql_statement(State#state.sqlName, CommandKey),
+    %% replacing params
+    parse_sql_command(SqlStatement, ReqData).
 	
 parse_command_extension([Command, Extension], ReqData, State) ->
     case parse_extension(Extension) of 
@@ -179,52 +191,34 @@ parse_reqdata(ReqData, State) ->
 	    end
     end.
 
-exec_sql_command(DSN, SQL, Extension, ReqData) ->
-    io:format("Executing in DB ~s the SQL ~s~n", [DSN, SQL]),
-    case Output = oreste_dsn:sql_query(DSN, SQL) of
-	{error, Reason} ->
-	    Output = io_lib:format("Cannot run query to DB ~p. Reason:~p.", [DSN, Reason]);
-	Output ->
-	    case Extension of
-		xml ->
-		    odbc_output:to_xml(Output);
-		csv ->
-		    odbc_output:to_csv(Output, ",");
-		xls ->
-		    odbc_output:to_csv(Output, ";");
-		txt ->
-		    case wrq:get_qs_value("lengths",ReqData) of
-			undefined ->
-			    {error, "Missing lengths=N,M,.. parameter"};
-			LengthsString ->
-			    OptListOfStrings = string:tokens(LengthsString, ","),
-			    Lengths = lists:map(
-					fun(E) ->  list_to_integer(E) end,
-					OptListOfStrings),
-			    odbc_output:to_fixed(
-			      Output, 
-			      Lengths, 
-			      $\  ) 
-		    end;
-		_Else ->
-		    {error, "BUG: Unexpected extension"}
-	    end
-    end.
 
-exec_admin_command(help, State) ->
-    DSNout = "TODO",
-    SQLout = 
-	lists:foldl(
-	  fun({Key,Value}, Acc) ->
-		  case get_sql_parameters(Value) of
-		      nomatch -> 
-			  Params = "";
-		      {match, ListParams} ->
-			  Params = string:join(ListParams, ", ")
-		  end,
-		  Acc ++ "\n\t" ++ atom_to_list(Key) ++ ": " ++ Params end,
-	  "SQL list:", 
-	  State#state.sqlpool),
-    {ok, DSNout ++ "\n" ++ SQLout};
-exec_admin_command(status, State) ->  
-    {ok, "Requests: " ++ integer_to_list(State#state.requests)}.
+parse_sql_command(undefined, _ReqData) -> 
+    {error, "Unknown SQL command"};
+parse_sql_command(SQL, ReqData) ->
+    % Now I retreive all url parameters and start replacing them in 
+    % the SQL  statement. 
+    % TODO "lengths" is dedicated to txt output and should be not used here
+    RQ =  wrq:req_qs(ReqData),
+    Result = lists:foldl(
+	       fun({Key,Val}, Acc) ->
+		       re:replace(
+			 Acc, "{" ++ Key ++ "}",
+			 Val,
+			 [global,{return, list}]
+			) end,
+	       SQL, 
+	       RQ
+	      ),
+
+    % are there any remaining parameters inside the
+    % sql statement?
+
+    case get_sql_parameters(Result) of
+	nomatch ->
+	    % all parameters {param} inside the sql statement were 
+	    % correctly replaced!
+	    {ok, Result};
+	{match, ListParams} ->
+	    Message = "Missing parameters:" ++ string:join(ListParams,","),
+	    {error, Message}
+    end.
