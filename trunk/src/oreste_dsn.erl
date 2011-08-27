@@ -12,13 +12,14 @@
 %% API
 -export([start_link/1, 
 	 sql_query/2,
+	 status/1,
 	 stop/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 
--record(state, {name="", dsn="", dbConn={error,firstStart}}).
+-record(state, {name="", dsn="", dbConn={error,firstStart}, requests=0}).
 
 %%-define(SERVER, ?MODULE).
 
@@ -34,6 +35,9 @@ sql_query(Name, SQL) ->
 
 start_link({Name,DSN}) ->
     gen_server:start_link({local, Name}, ?MODULE, [{Name,DSN}], []).
+
+status(Name) ->
+    gen_server:call(Name, {status}).
 
 stop(Name) -> gen_server:call(Name, stop).
 %%====================================================================
@@ -70,17 +74,20 @@ handle_call({sql_query, SQL}, _From, State) ->
 		{error, Reason} ->
 		    error_logger:error_msg("Cannot run SQL to DB ~p, reason: ~p ~n", [DSN, Reason]),
 		    error_logger:error_msg("Trying to reconnect to DB ~p ~n", [DSN]),
-		    TmpState = db_disconnect(State),
-		    NewState = db_connect(TmpState);
+		    TmpState = db_connect(db_disconnect(State));
 		Reply ->
-		    NewState = State
+		    TmpState = State
 	    end;
 	{error, Reason} ->
 	    error_logger:error_msg("Cannot run SQL: not connected to DB ~p, reason: ~p ~n", [DSN, Reason]),
-	    NewState = db_connect(State),
+	    TmpState = db_connect(State),
 	    Reply = ok
     end,
+    NewState = TmpState#state{requests = TmpState#state.requests + 1},
     {reply, Reply, NewState};
+handle_call(status, _From, State) ->
+    Reply = "Requests: " ++ integer_to_list(State#state.requests),
+    {reply, Reply, State};
 handle_call(stop, _From, State) ->
     NewState = db_disconnect(State),
     {stop, normal, ok, NewState};
