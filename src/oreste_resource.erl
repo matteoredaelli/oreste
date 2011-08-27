@@ -73,6 +73,10 @@ exec_admin_command(help, _State) ->
 	%%   "SQL list:", 
 	%%   State#state.sqlpool),
     {ok, DSNout ++ "\n" ++ SQLout};
+exec_admin_command(reload, State) ->
+    oreste_sql:reload_configuration(State#state.sqlName),
+    Reply = "Configuration reload done!",
+    {ok, Reply};
 exec_admin_command(status, State) ->
     Children = lists:append(supervisor:which_children(oreste_dsn_sup),
 			    supervisor:which_children(oreste_sql_sup)
@@ -136,6 +140,8 @@ get_sql_parameters(SQL) ->
 
 parse_command("help", _ReqData, _State) ->
     {ok, help};
+parse_command("reload", _ReqData, _State) ->
+    {ok, reload};
 parse_command("status", _ReqData, _State) ->
     {ok, status};
 parse_command(Command, ReqData, State) when is_list(Command) ->
