@@ -1,14 +1,12 @@
-Requirements
+==Requirements==
 
- * erlang: http://ftp.sunet.se/pub/lang/erlang/index.html
+ * erlang
  * make
  * unixodbc: for unix systems
- * odbc drivers for the database types you use (mysql, oracle, freetds)
+ * odbc drivers for the databases you are intersted in (mysql, oracle, sql server/freetds, ...)
 
-Installation
+==Installation==
 
- * get source code from svn trunk/oreste
- * cd oreste
- * cd deps/webmachine/deps/mochiweb & make clean & make
- * cd deps/webmachine/ & make clean & make
- * make clean & make
+ * get source code from svn using "svn checkout http://oreste.googlecode.com/svn/trunk/ oreste"
+ * cd oresst
+ * type "make" or "rebar compile"
