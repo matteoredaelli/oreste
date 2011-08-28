@@ -8,5 +8,5 @@
 ==Installation==
 
  * get source code from svn using "svn checkout http://oreste.googlecode.com/svn/trunk/ oreste"
- * cd oresst
+ * cd oreste
  * type "make" or "rebar compile"
