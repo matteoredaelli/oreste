@@ -2,8 +2,16 @@
 {application, oreste,
  [
   {description, "oreste"},
-  {vsn, "1"},
-  {modules, []},
+  {vsn, "2.1-SNAPSHOT"},
+  {modules, [
+	     emisc_string,
+	     odbc_output,
+	     oreste_dsn, 
+	     oreste_dsn_sup, 
+	     oreste_sql, 
+	     oreste_sql_sup, 
+	     oreste_util
+	    ]},
   {registered, []},
   {applications, [
                   kernel,
@@ -11,7 +19,8 @@
                   inets,
                   crypto,
                   mochiweb,
-                  webmachine
+                  webmachine,
+		  odbc
                  ]},
   {mod, { oreste_app, []}},
   {env, []}
