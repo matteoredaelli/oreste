@@ -105,7 +105,7 @@ exec_sql_command(DSN, SQL, Extension, ReqData) ->
     io:format("Executing in DB ~s the SQL ~s~n", [DSN, SQL]),
     case Output = oreste_dsn:sql_query(DSN, SQL) of
 	{error, Reason} ->
-	    Output = io_lib:format("Cannot run query to DB ~p. Reason:~p.", [DSN, Reason]);
+	    io_lib:format("Cannot run query to DB ~p. Reason:~p.", [DSN, Reason]);
 	Output ->
 	    case Extension of
 		xml ->
@@ -182,15 +182,13 @@ parse_command_extension(_Else, _ReqData, _State ) ->
 parse_dsn(admin, _State)->
     {ok, admin};
 parse_dsn(DSNkey, _State) ->
-%% TODO: check id DSN is valid (using which children of oreste_dsn_sup ...
-
-%%    case proplists:get_value(DSNkey, State#state.dsnpool) of
-%%	undefined ->
-%%	    Output = io_lib:format("No valid DSN ~s.", [atom_to_list(DSNkey)]),
-%%	    {error, Output};
-%%	DSN ->
-	    {ok, DSNkey}.
-%%    end.
+    case lists:member(DSNkey, oreste_util:which_children_names(oreste_dsn_sup)) of
+	false ->
+	    Reason = io_lib:format("No valid DSN ~s.", [atom_to_list(DSNkey)]),
+	    {error, Reason};
+	true ->
+	    {ok, DSNkey}
+    end.
 
 parse_extension(Ext)->
     case lists:member(Ext,["csv","xls","txt","xml"]) of
