@@ -31,8 +31,7 @@
 %% API
 -export([start_link/1, 
 	 sql_query/2,
-	 status/1,
-	 stop/1]).
+	 status/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -58,7 +57,6 @@ start_link({Name,DSN}) ->
 status(Name) ->
     gen_server:call(Name, {status}).
 
-stop(Name) -> gen_server:call(Name, stop).
 %%====================================================================
 %% gen_server callbacks
 %%====================================================================
@@ -73,7 +71,8 @@ stop(Name) -> gen_server:call(Name, stop).
 init([{Name,DSN}]) ->
     error_logger:info_msg("Connecting to DB ~p ...~n", [DSN]),
     State = #state{name=Name, dsn=DSN},
-    NewState = db_connect(State),	    
+    NewState = db_connect(State),
+    process_flag(trap_exit, true),
     {ok, NewState}.
 
 %%--------------------------------------------------------------------
@@ -139,6 +138,9 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 %%--------------------------------------------------------------------
+terminate(shutdown, State) ->
+    db_disconnect(State),
+    ok;
 terminate(_Reason, _State) ->
     ok.
 
