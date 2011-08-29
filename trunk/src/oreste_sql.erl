@@ -158,7 +158,8 @@ load_sql_file(State) ->
     error_logger:info_msg("Loading file ~p~n", [File]),
     case file:consult(File) of
 	{ok, Statements} ->
-	    error_logger:info_msg("Loaded file ~p: found ~p statements~n", [File, integer_to_list(length(Statements))]);
+	    error_logger:info_msg("Loaded file ~p: found ~p statements~n", [File, integer_to_list(length(Statements))]),
+	    error_logger:info_msg("  SQL Statements: ~p~n", [ proplists:get_keys(Statements)]);
 	{error, Reason} ->
 	    error_logger:error_msg("Error loading file ~p, reason: ~p ~n", 
 				   [File, Reason]),
