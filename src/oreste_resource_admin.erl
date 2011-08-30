@@ -65,6 +65,25 @@ to_text(ReqData, State) ->
     {Result, ReqData, NewState}.
 
 %% Private Functions
+exec_admin_command("db_reconnect", ReqData, _State) ->
+    case wrq:get_qs_value("dsn", ReqData) of
+	undefined ->
+	    Reply = "Missing dsn parameter";
+	DSN ->
+	    DsnName = list_to_atom(DSN),
+	    %% check if DSN exists
+	    Children = oreste_util:which_children_names(oreste_dsn_sup),
+	    error_logger:info_msg("Checking if ~p is in ~p ~n", [DsnName, Children]),
+	    case lists:member(DsnName, Children) of
+		true ->
+		    oreste_dsn:db_reconnect(DsnName),
+		    Reply = "Reloaded!";
+		false ->
+		    Reply = "NOT DB reconnected: unknown dsn",
+		    error_logger:info_msg("DSN ~p not reconnected: missing process name ~n", [DsnName])
+	    end
+    end,
+    {ok, Reply};
 exec_admin_command("help", _RQ, _State) ->
     DSNout = "TODO",
     SQLout = "TODO",
@@ -80,7 +99,7 @@ exec_admin_command("help", _RQ, _State) ->
 	%%   "SQL list:", 
 	%%   State#state.sqlpool),
     {ok, DSNout ++ "\n" ++ SQLout};
-exec_admin_command("reload", ReqData, _State) ->
+exec_admin_command("sql_reload", ReqData, _State) ->
     %%RQ =  wrq:req_qs(ReqData),
     case wrq:get_qs_value("sql", ReqData) of
 	undefined ->
@@ -96,7 +115,7 @@ exec_admin_command("reload", ReqData, _State) ->
 		    error_logger:info_msg("SQL file ~p reloaded! ~n", [SqlName]),
 		    Reply = "Reloaded!";
 		false ->
-		    Reply = "NOT reloaded: missing name",
+		    Reply = "NOT reloaded: unknown name",
 		    error_logger:info_msg("SQL file ~p not reloaded: missing process name ~n", [SqlName])
 	    end
     end,
