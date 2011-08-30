@@ -7,9 +7,8 @@ Start server with
 
 ==Admin commands==
  
- http://localhost:8000/moodle/admin/help.txt  (TODO)
- http://localhost:8000/moodle/admin/status.txt  (reload sql statement from file)
- http://localhost:8000/moodle/admin/status.txt
+ http://localhost:8000/admin/status : show active DSN and SQL processes and statistics about requests
+ * http://localhost:8000/admin/reload?sql=moodle : reload sql statement from file moodle.conf
 
  User/password: user/pass (see file priv/dispatcher.conf)
 
@@ -25,7 +24,11 @@ A module "moodle" is included in the distribution. The following urls can help y
 
 == Add your new module/sql statements ==
 
-Configure your odbc DSN at Operating System Level (unixODBC for linux)
+Configure your odbc DSN at Operating System Level. 
+
+TODO: for windows system, you have to install ODBC drivers and configure them in the "Contro panel" ...
+
+For Unix systems (package unixODBC for linux)
 
 File odbcinst.ini
 
