@@ -18,9 +18,11 @@ A module "moodle" is included in the distribution. The following urls can help y
 
  User/password: user/pass (see file priv/dispatcher.conf)
 
+{{{
  http://localhost:8000/moodle/learninglab/user.xml?username=matteo
  http://localhost:8000/moodle/learninglab/user.csv?username=matteo
  http://localhost:8000/moodle/learninglab/user.txt?username=matteo,lengths=30
+}}}
 
 == Add your new module/sql statements ==
 
