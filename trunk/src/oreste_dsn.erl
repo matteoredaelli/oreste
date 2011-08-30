@@ -49,7 +49,9 @@
 %% Description: Starts the server
 %%--------------------------------------------------------------------
 sql_query(Name, SQL) ->
-    gen_server:call(Name, {sql_query, SQL}).
+    {ok, Timeout} = application:get_env(oreste, odbc_sql_query_timeout),
+    error_logger:info_msg("Timeout = ~p ~n", [Timeout]),
+    gen_server:call(Name, {sql_query, SQL}, Timeout).
 
 start_link({Name,DSN}) ->
     gen_server:start_link({local, Name}, ?MODULE, [{Name,DSN}], []).
