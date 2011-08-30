@@ -56,8 +56,8 @@ init([DsnFile]) ->
     error_logger:info_msg("~p: starting ~p DSN children: ~p~n", [?MODULE, length(Dsn_list), proplists:get_keys(Dsn_list)]),
     
     ChildrenSpecs = lists:map(
-		      fun({Name,DSN}) ->
-			      AChild = {Name,{oreste_dsn,start_link,[{Name,DSN}]},
+		      fun({Name, Values={_DSN, _DbOptions}}) ->
+			      AChild = {Name,{oreste_dsn,start_link,[{Name,Values}]},
 					permanent,2000,worker,[oreste_dsn]},
 			      AChild
 		      end,

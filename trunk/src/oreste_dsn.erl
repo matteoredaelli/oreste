@@ -37,7 +37,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 
--record(state, {name="", dsn="", dbConn={error,firstStart}, requests=0}).
+-record(state, {name="", dsn="", db_options=[], dbConn={error,firstStart}, requests=0}).
 
 %%-define(SERVER, ?MODULE).
 
@@ -50,7 +50,7 @@
 %%--------------------------------------------------------------------
 sql_query(Name, SQL) ->
     {ok, Timeout} = application:get_env(oreste, odbc_sql_query_timeout),
-    error_logger:info_msg("Timeout = ~p ~n", [Timeout]),
+    error_logger:info_msg("sql_query timeout=~p~n", [Timeout]),
     gen_server:call(Name, {sql_query, SQL}, Timeout).
 
 start_link({Name,DSN}) ->
@@ -70,9 +70,9 @@ status(Name) ->
 %%                         {stop, Reason}
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
-init([{Name,DSN}]) ->
+init([{Name,{DSN, DBOptions}}]) ->
     error_logger:info_msg("Connecting to DB ~p ...~n", [DSN]),
-    State = #state{name=Name, dsn=DSN},
+    State = #state{name=Name, dsn=DSN, db_options=DBOptions},
     NewState = db_connect(State),
     process_flag(trap_exit, true),
     {ok, NewState}.
@@ -159,10 +159,11 @@ code_change(_OldVsn, State, _Extra) ->
 
 db_connect(State) ->
     DSN = State#state.dsn,
-    DbConn = odbc:connect(DSN, [{timeout, 5000}, {scrollable_cursors, off}]),
+    DbOptions = State#state.db_options,
+    DbConn = odbc:connect(DSN, DbOptions),
     case DbConn of
 	{ok, _} ->
-	    error_logger:info_msg("Connected to DB ~p~n", [DSN]);
+	    error_logger:info_msg("Connected to DB ~p with options ~p ~n", [DSN, DbOptions]);
 	{error, Reason} ->
 	    error_logger:error_msg("Error connecting to DB ~p, reason: ~p ~n", [DSN, Reason])
     end,
