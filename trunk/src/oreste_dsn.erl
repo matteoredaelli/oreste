@@ -29,7 +29,9 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/1, 
+-export([
+	 db_reconnect/1,
+	 start_link/1, 
 	 sql_query/2,
 	 status/1]).
 
@@ -48,6 +50,10 @@
 %% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the server
 %%--------------------------------------------------------------------
+
+db_reconnect(Name) ->
+    gen_server:call(Name, {db_reconnect}).
+
 sql_query(Name, SQL) ->
     {ok, Timeout} = application:get_env(oreste, odbc_sql_query_timeout),
     error_logger:info_msg("sql_query timeout=~p~n", [Timeout]),
@@ -71,7 +77,6 @@ status(Name) ->
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
 init([{Name,{DSN, DBOptions}}]) ->
-    error_logger:info_msg("Connecting to DB ~p ...~n", [DSN]),
     State = #state{name=Name, dsn=DSN, db_options=DBOptions},
     NewState = db_connect(State),
     process_flag(trap_exit, true),
@@ -86,6 +91,10 @@ init([{Name,{DSN, DBOptions}}]) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
+handle_call({db_reconnect}, _From, State) ->
+    NewState = db_connect(db_disconnect(State)),
+    {reply, ok, NewState};
+
 handle_call({sql_query, SQL}, _From, State) ->
     DSN = State#state.dsn,
     case State#state.dbConn of
@@ -160,6 +169,7 @@ code_change(_OldVsn, State, _Extra) ->
 db_connect(State) ->
     DSN = State#state.dsn,
     DbOptions = State#state.db_options,
+    error_logger:info_msg("Connecting to DB ~p ...~n", [DSN]),
     DbConn = odbc:connect(DSN, DbOptions),
     case DbConn of
 	{ok, _} ->
