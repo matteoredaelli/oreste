@@ -72,10 +72,11 @@ to_text(ReqData, State) ->
 %% Private Functions
 
 exec_sql_command(DSN, SQL, Extension, ReqData) ->
-    io:format("Executing in DB ~s the SQL ~s~n", [DSN, SQL]),
+    error_logger:info_msg("Executing in DB ~s the SQL ~s~n", [DSN, SQL]),
+    
     case Output = oreste_dsn:sql_query(DSN, SQL) of
 	{error, Reason} ->
-	    io_lib:format("Cannot run query to DB ~p. Reason:~p.", [DSN, Reason]);
+	    error_logger:error_msg("Cannot run query to DB ~p. Reason:~p.", [DSN, Reason]);
 	Output ->
 	    case Extension of
 		xml ->
