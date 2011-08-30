@@ -1,3 +1,3 @@
 #!/bin/sh
 cd `dirname $0`
-exec erl -pa $PWD/ebin $PWD/deps/*/ebin -boot start_sasl -s reloader -s odbc -s oreste
+exec erl -pa $PWD/ebin $PWD/deps/*/ebin -boot start_sasl -s reloader -s odbc -s oreste -config sys
