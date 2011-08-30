@@ -60,8 +60,6 @@ is_authorized(ReqData, State) ->
 
 to_text(ReqData, State) ->
     case parse_reqdata(ReqData, State) of
-	{ok, admin, Command, _Extension} ->
-	    {ok, Result} = exec_admin_command( Command, State);
         {ok, DSN, Command, Extension} ->
 	    {_, Result} = exec_sql_command(DSN, Command, Extension, ReqData);
 	{error, Result} ->
@@ -72,34 +70,6 @@ to_text(ReqData, State) ->
     {Result, ReqData, NewState}.
 
 %% Private Functions
-exec_admin_command(help, _State) ->
-    DSNout = "TODO",
-    SQLout = "TODO",
-	%% lists:foldl(
-	%%   fun({Key,Value}, Acc) ->
-	%% 	  case get_sql_parameters(Value) of
-	%% 	      nomatch -> 
-	%% 		  Params = "";
-	%% 	      {match, ListParams} ->
-	%% 		  Params = string:join(ListParams, ", ")
-	%% 	  end,
-	%% 	  Acc ++ "\n\t" ++ atom_to_list(Key) ++ ": " ++ Params end,
-	%%   "SQL list:", 
-	%%   State#state.sqlpool),
-    {ok, DSNout ++ "\n" ++ SQLout};
-exec_admin_command(reload, State) ->
-    oreste_sql:reload_configuration(State#state.sqlName),
-    Reply = "Configuration reload done!",
-    {ok, Reply};
-exec_admin_command(status, State) ->
-    Children = lists:append(supervisor:which_children(oreste_dsn_sup),
-			    supervisor:which_children(oreste_sql_sup)
-			   ),
-    StatusList = lists:map( fun({Name,_,_,[Module]}) -> Module:status(Name) end, Children),
-    Reply = "Resource Requests=" ++ integer_to_list(State#state.requests) ++ 
-	"\n\n" ++
-	string:join(StatusList, "\n"),
-    {ok, Reply}.
 
 exec_sql_command(DSN, SQL, Extension, ReqData) ->
     io:format("Executing in DB ~s the SQL ~s~n", [DSN, SQL]),
@@ -151,13 +121,6 @@ get_sql_parameters(SQL) ->
 	    {match, Result}
     end.
 
-
-parse_command("help", _ReqData, _State) ->
-    {ok, help};
-parse_command("reload", _ReqData, _State) ->
-    {ok, reload};
-parse_command("status", _ReqData, _State) ->
-    {ok, status};
 parse_command(Command, ReqData, State) when is_list(Command) ->
     CommandKey = list_to_atom(Command),
     SqlStatement = oreste_sql:get_sql_statement(State#state.sqlName, CommandKey),
@@ -179,8 +142,6 @@ parse_command_extension([Command, Extension], ReqData, State) ->
 parse_command_extension(_Else, _ReqData, _State ) ->
     {error, "wrong url: expected command.extension"}.
 
-parse_dsn(admin, _State)->
-    {ok, admin};
 parse_dsn(DSNkey, _State) ->
     case lists:member(DSNkey, oreste_util:which_children_names(oreste_dsn_sup)) of
 	false ->
