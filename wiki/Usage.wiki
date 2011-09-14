@@ -12,16 +12,16 @@ A module "moodle" is included in the distribution. The following urls can help y
  User/password: user/pass (see file priv/dispatcher.conf)
 
 {{{
- http://localhost:8000/moodle/learninglab/user.xml?username=matteo
- http://localhost:8000/moodle/learninglab/user.csv?username=matteo
- http://localhost:8000/moodle/learninglab/user.txt?username=matteo,lengths=30
+ http://localhost:8000/moodle/dsn_learninglab/user.xml?username=matteo
+ http://localhost:8000/moodle/dsn_learninglab/user.csv?username=matteo
+ http://localhost:8000/moodle/dsn_learninglab/user.txt?username=matteo,lengths=30
 }}}
 
 == Add your new module/sql statements ==
 
 Configure your odbc DSN at Operating System Level. 
 
-TODO: for windows system, you have to install ODBC drivers and configure them in the "Contro panel" ...
+TODO: for windows system, you have to install ODBC drivers and configure them in the "Control panel" ...
 
 For Unix systems (package unixODBC for linux)
 
