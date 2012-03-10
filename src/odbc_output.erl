@@ -61,6 +61,10 @@ to_csv({selected, Fields, Records}, FieldSeparator) ->
 %%
 %% other outputs
 %%
+to_csv({updated, _Rows}, _FieldSeparator) ->
+    Result = "Updated!",
+    {ok, Result};
+
 to_csv(Other, _) -> Other.
 			   
 %%--------------------------------------------------------------------
@@ -85,7 +89,11 @@ to_xml({selected, Keys, Records}) ->
       end,
       Records),
     {ok, Header ++ string:join(ListOfRecords, "") ++ Footer};
-
+to_xml({updated, _Rows}) ->
+    Header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" ++ "<records>\n",
+    Footer = "</records>\n",
+    Record = "<record>\n" ++ "Updated!" ++ "  </record>\n",
+    {ok, Header ++ Record ++ Footer};
 to_xml(Other) -> Other.
 
 %%--------------------------------------------------------------------
@@ -113,6 +121,9 @@ to_fixed({selected, Fields, Records}, Lengths, Char) ->
 %%
 %% other outputs
 %%
+to_fixed({updated, _Rows}, _Lengths, _Char) ->
+    Result = "Updated!",
+    {ok, Result};
 to_fixed(Other, _Lengths, _Char) -> Other.
 
 
